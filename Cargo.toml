@@ -35,8 +35,7 @@ codegen-units = 1
 
 # Cryptographic provider
 tyst = { git = "https://github.com/mydriatech/tyst.git", branch = "main" }
-#upkit_common = { git = "https://github.com/mydriatech/upkit-common.git", branch = "main" }
-upkit_common = { path = "../upkit-common/upkit-common" }
+upkit_common = { git = "https://github.com/mydriatech/upkit-common.git", branch = "main" }
 
 # Logging
 log = { version = "0.4", default-features = false, features = ["release_max_level_debug"] }
