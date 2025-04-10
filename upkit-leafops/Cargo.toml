@@ -1,0 +1,28 @@
+[package]
+name = "upkit_leafops"
+version = "0.0.0"
+edition = "2021"
+description = "UPKIT Leaf Operations library."
+license = "Apache-2.0 WITH AdditionRef-FWM-Exception-1.0.0"
+publish = false
+
+#[[bench]]
+#name = "all"
+#harness = false
+
+#[package.metadata.docs.rs]
+#all-features = true
+
+[dependencies]
+upkit_enprov = { path = "../upkit-enprov" }
+upkit_enprov_selfsigned = { path = "../upkit-enprov-selfsigned" }
+upkit_http_client = { path = "../upkit-http-client" }
+
+tyst = { workspace = true, features = [] }
+
+[dev-dependencies]
+upkit_common = { workspace = true, features = [] }
+log = { workspace = true, features = [] }
+serde_json = { workspace = true, features = [] }
+
+#[features]
