@@ -37,7 +37,7 @@ impl CertificateEnrollmentProvider {
                     log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
                 }
                 Arc::new(SelfSignedProvider::default())
-            },
+            }
             unknown_provider => panic!("Unknown provider '{unknown_provider}'."),
         };
         Arc::new(Self { provider })

@@ -36,14 +36,15 @@ fn test_self_signed_provider() {
         .by_oid(&tyst::encdec::oid::as_string(signing_algorithm_oid))
         .unwrap();
     let (public_key, private_key) = se.generate_key_pair();
-    let enrollment_provider = CertificateEnrollmentProvider::new("self_signed", &EnrollmentTrust::ExternalResponsibility);
+    let enrollment_provider =
+        CertificateEnrollmentProvider::new("self_signed", &EnrollmentTrust::External);
     let encoded_certificate_chain = enrollment_provider.enroll_from_key_pair(
         signing_algorithm_oid,
         public_key.as_ref(),
         private_key.as_ref(),
         &CertificateEnrollmentOptions {
             template: "server".to_string(),
-            credentials: upkit_enprov::EnrollmentCredentials::ExternalResponsibility,
+            credentials: upkit_enprov::EnrollmentCredentials::External,
             identity: vec![
                 IdentityFragment {
                     name: WellKnownAttribute::CommonName.as_name(),
