@@ -21,6 +21,7 @@ use upkit_common::x509::cert::parse::CertificateParser;
 use upkit_common::x509::cert::types::IdentityFragment;
 use upkit_common::x509::cert::types::WellKnownAttribute;
 use upkit_common::x509::cert::types::WellKnownGeneralName;
+use upkit_enprov::EnrollmentTrust;
 use upkit_leafops::enprov::CertificateEnrollmentOptions;
 use upkit_leafops::enprov::CertificateEnrollmentProvider;
 use upkit_leafops::enprov::EnrollmentProvider;
@@ -35,7 +36,7 @@ fn test_self_signed_provider() {
         .by_oid(&tyst::encdec::oid::as_string(signing_algorithm_oid))
         .unwrap();
     let (public_key, private_key) = se.generate_key_pair();
-    let enrollment_provider = CertificateEnrollmentProvider::new("self_signed");
+    let enrollment_provider = CertificateEnrollmentProvider::new("self_signed", &EnrollmentTrust::ExternalResponsibility);
     let encoded_certificate_chain = enrollment_provider.enroll_from_key_pair(
         signing_algorithm_oid,
         public_key.as_ref(),
@@ -43,7 +44,7 @@ fn test_self_signed_provider() {
         &CertificateEnrollmentOptions {
             template: "server".to_string(),
             credentials: upkit_enprov::EnrollmentCredentials::ExternalResponsibility,
-            requested_identity: vec![
+            identity: vec![
                 IdentityFragment {
                     name: WellKnownAttribute::CommonName.as_name(),
                     value: "www.example.org".to_string(),

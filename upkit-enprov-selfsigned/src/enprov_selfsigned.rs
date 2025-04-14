@@ -44,7 +44,7 @@ impl EnrollmentProvider for SelfSignedProvider {
         let sing_algo_oid_str = tyst::encdec::oid::as_string(signing_algorithm_oid);
         let mut se = Tyst::instance().ses().by_oid(&sing_algo_oid_str).unwrap();
         let (subject, an) = upkit_common::x509::cert::build::util::split_by_identity_fragment_type(
-            &options.requested_identity,
+            &options.identity,
         );
         let mut extensions = Extensions::default();
         extensions.add_subject_alternative_name(&an, subject.is_empty());

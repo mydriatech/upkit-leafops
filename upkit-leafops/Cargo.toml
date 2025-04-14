@@ -20,9 +20,10 @@ upkit_http_client = { path = "../upkit-http-client" }
 
 tyst = { workspace = true, features = [] }
 
+log = { workspace = true, features = [] }
+
 [dev-dependencies]
 upkit_common = { workspace = true, features = [] }
-log = { workspace = true, features = [] }
 serde_json = { workspace = true, features = [] }
 
 #[features]

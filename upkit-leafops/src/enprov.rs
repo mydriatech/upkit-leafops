@@ -30,9 +30,14 @@ pub struct CertificateEnrollmentProvider {
 
 impl CertificateEnrollmentProvider {
     /// Return a new instance of the named [EnrollmentProvider] implementation.
-    pub fn new(provider_name: &str) -> Arc<Self> {
+    pub fn new(provider_name: &str, enrollment_trust: &EnrollmentTrust) -> Arc<Self> {
         let provider = match provider_name {
-            "self_signed" => Arc::new(SelfSignedProvider::default()),
+            "self_signed" => {
+                if !EnrollmentTrust::External.eq(enrollment_trust) {
+                    log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
+                }
+                Arc::new(SelfSignedProvider::default())
+            },
             unknown_provider => panic!("Unknown provider '{unknown_provider}'."),
         };
         Arc::new(Self { provider })
