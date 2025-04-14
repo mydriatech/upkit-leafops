@@ -17,15 +17,23 @@
 
 //! Enrollment provider interface and its dependencies.
 
+use serde::Deserialize;
+use serde::Serialize;
+use serde_with::serde_as;
+use serde_with::skip_serializing_none;
 use tyst::traits::se::PrivateKey;
 use tyst::traits::se::PublicKey;
 use upkit_common::x509::cert::types::IdentityFragment;
 
 /// Certificate enrollment credentials.
-#[derive(Clone, Debug)]
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
 pub enum EnrollmentCredentials {
     /// Communication is secured by means outside the control of this app.
-    ExternalResponsibility,
+    External,
     /// The provider will use a shared secret to bootstrap enrollment.
     SharedSecret {
         /// An encoded shared secret.
@@ -34,14 +42,42 @@ pub enum EnrollmentCredentials {
 }
 
 /// Certificate enrollment options.
-#[derive(Clone, Debug)]
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct CertificateEnrollmentOptions {
     /// Context specific identifier for how to construct the leaf certificate.
     pub template: String,
     /// See [EnrollmentCredentials].
     pub credentials: EnrollmentCredentials,
-    /// A list of `IdentityFragment`s that together identifies the end entity.
-    pub requested_identity: Vec<IdentityFragment>,
+    /// A list of `IdentityFragment`s to request that together identifies the
+    /// end entity.
+    pub identity: Vec<IdentityFragment>,
+}
+
+/// Certificate enrollment provider trust.
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum EnrollmentTrust {
+    /// Communication is trusted by means outside the control of this app.
+    External,
+    /// The provider will trust signatures that lead up to one of the trust
+    /// anchor certificates.
+    TrustAnchors {
+        /// Encoded trusted certificates.
+        anchors: Vec<Vec<u8>>,
+    },
+    /// The provider will trust signatures that lead up to a trust anchor
+    /// certificate whos encoded certificate fingerprint matches one of these.
+    ///
+    /// Defaults to using SHA3-512 to fingerprint any certificate.
+    TrustedFingerprints {
+        /// Encoded trusted certificates.
+        fingerprints: Vec<Vec<u8>>,
+    },
 }
 
 /// Enrollment provider trait (interface).

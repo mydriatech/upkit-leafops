@@ -25,6 +25,10 @@ log = { workspace = true, features = [] }
 #config = { version = "0.15", default-features = false, features = ["json"] }
 #cgroups-rs = "0.3"
 
+serde = { workspace = true, features = [] }
+#serde_json = { workspace = true, features = [] }
+serde_with = { workspace = true, features = [] }
+
 # REST API
 #actix-web = { version = "4.6", default-features = false, features = ["macros", "http2", "compress-brotli"] }
 #utoipa = { version = "5", features = ["actix_extras"] }
