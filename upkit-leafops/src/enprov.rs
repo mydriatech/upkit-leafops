@@ -21,6 +21,7 @@ use std::sync::Arc;
 use tyst::traits::se::PrivateKey;
 use tyst::traits::se::PublicKey;
 pub use upkit_enprov::*;
+use upkit_enprov_cmp::CmpProvider;
 use upkit_enprov_selfsigned::SelfSignedProvider;
 
 /// Provides [EnrollmentProvider] implementation selection by name.
@@ -30,13 +31,23 @@ pub struct CertificateEnrollmentProvider {
 
 impl CertificateEnrollmentProvider {
     /// Return a new instance of the named [EnrollmentProvider] implementation.
-    pub fn new(provider_name: &str, enrollment_trust: &EnrollmentTrust) -> Arc<Self> {
-        let provider = match provider_name {
+    pub fn by_name(
+        provider_name: &str,
+        enrollment_connection: &EnrollmentConnection,
+        enrollment_trust: &EnrollmentTrust,
+    ) -> Arc<dyn EnrollmentProvider> {
+        let provider: Arc<dyn EnrollmentProvider> = match provider_name {
             "self_signed" => {
                 if !EnrollmentTrust::External.eq(enrollment_trust) {
                     log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
                 }
                 Arc::new(SelfSignedProvider::default())
+            }
+            "cmp" => {
+                if !EnrollmentTrust::External.eq(enrollment_trust) {
+                    log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
+                }
+                Arc::new(CmpProvider::new(enrollment_connection).unwrap())
             }
             unknown_provider => panic!("Unknown provider '{unknown_provider}'."),
         };

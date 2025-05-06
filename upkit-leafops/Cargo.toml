@@ -16,6 +16,7 @@ description = "UPKIT Leaf Operations library."
 
 [dependencies]
 upkit_enprov = { path = "../upkit-enprov" }
+upkit_enprov_cmp = { path = "../upkit-enprov-cmp" }
 upkit_enprov_selfsigned = { path = "../upkit-enprov-selfsigned" }
 upkit_http_client = { path = "../upkit-http-client" }
 
