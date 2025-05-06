@@ -1,10 +1,11 @@
 [package]
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+publish = { workspace = true }
 name = "upkit_leafops"
-version = "0.0.0"
-edition = "2021"
 description = "UPKIT Leaf Operations library."
-license = "Apache-2.0 WITH AdditionRef-FWM-Exception-1.0.0"
-publish = false
 
 #[[bench]]
 #name = "all"
@@ -25,5 +26,4 @@ log = { workspace = true, features = [] }
 [dev-dependencies]
 upkit_common = { workspace = true, features = [] }
 serde_json = { workspace = true, features = [] }
-
-#[features]
+ureq = { workspace = true, features = [] }

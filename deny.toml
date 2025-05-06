@@ -16,7 +16,7 @@ allow = [
     "Apache-2.0",
     "BSD-2-Clause",
     "BSD-3-Clause",
-    #"ISC",
+    "ISC",
     "MIT",
     #"MPL-2.0",
     "Unicode-3.0",
@@ -29,6 +29,7 @@ exceptions = [
     #{ allow = ["BSD-3-Clause"], crate = "encoding_rs" },
     #{ allow = ["Unicode-DFS-2016"], crate = "unicode-ident" },
     #{ allow = ["OpenSSL"], crate = "ring" },
+    { allow = ["CDLA-Permissive-2.0"], crate = "webpki-roots" },
     #{ allow = ["MPL-2.0"], crate = "webpki-roots" },
     #{ allow = ["Zlib"], crate = "foldhash" },
 ]

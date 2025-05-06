@@ -19,9 +19,10 @@ to do instead. See the "Limitations" section below for additional details.
 
 ## Features
 
-* Certificate enrollment using one of the following protocols:
-    * Built in self-signed certificate provider
-    * (more will be implemented here)
+* Certificate enrollment using one of the following:
+    * Built in self-signed certificate provider for testing.
+    * Certificate Management Protocol (CMP) PBMAC1 protected `InitializationRequest`.
+    * (more will be added here)
 * Monitor revocation status of all certificates in a chain.
 
 ## Quick start
@@ -33,8 +34,21 @@ Add the following to `Cargo.toml`:
 upkit_leafops = { git = "https://github.com/mydriatech/upkit-leafops.git", branch = "main" }
 ```
 
+### Self signed
+
 See [`test_self_signed.rs`](upkit-leafops/tests/test_self_signed.rs) for an
 example of enrolling for a self-signed certificate using the enrollment provider.
+
+### Certificate Management Protocol
+
+The CMP [example](upkit-leafops/examples/cmp_example.rs) can be tested with
+`docker.io/keyfactor/ejbca-ce:9.1.1`. Configure a CMP "alias" `test` in RA mode with
+HMAC authentication `foobar123`. Add the CA certificate to `caPubs` for a more
+realistic experience of bootstrapping a client with minimal configuration.
+
+```text
+cargo run --example cmp_example -- http://127.0.0.1:8080/ejbca/publicweb/cmp/test foobar123
+```
 
 
 ## Limitations
