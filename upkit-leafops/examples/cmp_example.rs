@@ -22,11 +22,11 @@ use upkit_common::x509::cert::parse::CertificateParser;
 use upkit_common::x509::cert::types::IdentityFragment;
 use upkit_common::x509::cert::types::WellKnownAttribute;
 use upkit_common::x509::cert::types::WellKnownGeneralName;
-use upkit_enprov::CertificateEnrollmentOptions;
-use upkit_enprov::EnrollmentConnection;
-use upkit_enprov::EnrollmentCredentials;
-use upkit_enprov::EnrollmentTrust;
+use upkit_leafops::enprov::CertificateEnrollmentOptions;
 use upkit_leafops::enprov::CertificateEnrollmentProvider;
+use upkit_leafops::enprov::EnrollmentConnection;
+use upkit_leafops::enprov::EnrollmentCredentials;
+use upkit_leafops::enprov::EnrollmentProvider;
 
 /** Example of Certificate Management Protocol initial enrollment.
 
@@ -50,9 +50,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             "test".to_string()
         };
         let secret = if let Some(shared_secret) = std::env::args().nth(3) {
-            shared_secret.as_bytes().to_vec()
+            shared_secret
         } else {
-            b"foobar123".to_vec()
+            "foobar123".to_string()
         };
         // ML-DSA-44: 2.16.840.1.101.3.4.3.18 -> [2, 16, 840, 1, 101, 3, 4, 3, 17]
         // ML-DSA-65: 2.16.840.1.101.3.4.3.18 -> [2, 16, 840, 1, 101, 3, 4, 3, 18]
@@ -63,30 +63,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .by_oid(&tyst::encdec::oid::as_string(signing_algorithm_oid))
             .unwrap();
         let (public_key, private_key) = se.generate_key_pair();
-
-        let cep = CertificateEnrollmentProvider::by_name(
-            "cmp",
-            &EnrollmentConnection::BaseUrl { base_url },
-            &EnrollmentTrust::External,
-        );
+        let options = CertificateEnrollmentOptions {
+            provider: "cmp".to_string(),
+            template: profile,
+            credentials: Some(EnrollmentCredentials::SharedSecret { secret }),
+            identity: vec![
+                IdentityFragment::new_unchecked(
+                    &WellKnownAttribute::CommonName.as_name(),
+                    &format!("Requested common name {}", get_random_number()),
+                ),
+                IdentityFragment::new_unchecked(
+                    &WellKnownGeneralName::Rfc822Name.as_name(),
+                    "no-reply@example.com",
+                ),
+            ],
+            service: Some(EnrollmentConnection::BaseUrl { base_url }),
+            trust: None,
+        };
+        println!("Enrollment options: {options}");
+        let cep = CertificateEnrollmentProvider::with_options(&options);
         let encoded_chain = cep.enroll_from_key_pair(
             signing_algorithm_oid,
             public_key.as_ref(),
             private_key.as_ref(),
-            &CertificateEnrollmentOptions {
-                template: profile,
-                credentials: EnrollmentCredentials::SharedSecret { secret },
-                identity: vec![
-                    IdentityFragment::new_unchecked(
-                        &WellKnownAttribute::CommonName.as_name(),
-                        &format!("Requested common name {}", get_random_number()),
-                    ),
-                    IdentityFragment::new_unchecked(
-                        &WellKnownGeneralName::Rfc822Name.as_name(),
-                        "no-reply@example.com",
-                    ),
-                ],
-            },
         );
         for (i, encoded_certificate) in encoded_chain.iter().enumerate() {
             let cert = CertificateParser::from_bytes(encoded_certificate).unwrap();
