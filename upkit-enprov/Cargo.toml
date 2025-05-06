@@ -1,10 +1,11 @@
 [package]
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+publish = { workspace = true }
 name = "upkit_enprov"
-version = "0.0.0"
-edition = "2021"
 description = "UPKIT Enrollment provider library."
-license = "Apache-2.0 WITH AdditionRef-FWM-Exception-1.0.0"
-publish = false
 
 [dependencies]
 upkit_http_client = { path = "../upkit-http-client" }

@@ -10,6 +10,13 @@ members = [
     "upkit-http-client",
 ]
 
+[workspace.package]
+edition = "2021"
+license = "Apache-2.0 WITH AdditionRef-FWM-Exception-1.0.0"
+version = "0.0.0"
+repository = "https://github.com/mydriatech/upkit-leafops.git"
+publish = false
+
 #[profile.dev]
 #opt-level = 1
 #lto = "thin"
@@ -54,3 +61,6 @@ serde_with = { version = "3.11", default-features = true, features = ["base64", 
 # Async and concurrency
 crossbeam-skiplist = { version = "0.1", default-features = true }
 tokio = { version = "1", default-features = false, features = ["rt-multi-thread", "macros", "signal", "time"] }
+
+# HTTP client lib
+ureq = { version = "3.0", default-features = true, features = [] }
