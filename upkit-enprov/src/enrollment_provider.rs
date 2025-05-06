@@ -21,9 +21,53 @@ use serde::Deserialize;
 use serde::Serialize;
 use serde_with::serde_as;
 use serde_with::skip_serializing_none;
+use std::sync::Arc;
 use tyst::traits::se::PrivateKey;
 use tyst::traits::se::PublicKey;
 use upkit_common::x509::cert::types::IdentityFragment;
+
+/// Certificate enrollment options.
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+pub struct CertificateEnrollmentOptions {
+    /// Enrollment provider type.
+    pub provider: String,
+    /// Context specific identifier for how to construct the leaf certificate.
+    pub template: String,
+    /// See [EnrollmentCredentials].
+    pub credentials: Option<EnrollmentCredentials>,
+    /// A list of `IdentityFragment`s to request that together identifies the
+    /// end entity.
+    pub identity: Vec<IdentityFragment>,
+    /// See [EnrollmentConnection].
+    pub service: Option<EnrollmentConnection>,
+    /// See [EnrollmentTrust].
+    pub trust: Option<EnrollmentTrust>,
+}
+
+impl std::fmt::Display for CertificateEnrollmentOptions {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let mut self_clone = self.clone();
+        match self.credentials.as_ref() {
+            Some(EnrollmentCredentials::SharedSecret { secret: _ }) => {
+                self_clone.credentials = Some(EnrollmentCredentials::SharedSecret {
+                    secret: "**redacted**".to_string(),
+                })
+            }
+            None => (),
+        }
+        write!(f, "{}", serde_json::to_string(&self_clone).unwrap())
+    }
+}
+
+impl std::str::FromStr for CertificateEnrollmentOptions {
+    type Err = serde_json::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        serde_json::from_str(s)
+    }
+}
 
 /// Certificate enrollment credentials.
 #[serde_as]
@@ -32,27 +76,11 @@ use upkit_common::x509::cert::types::IdentityFragment;
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentCredentials {
-    /// Communication is secured by means outside the control of this app.
-    External,
     /// The provider will use a shared secret to bootstrap enrollment.
     SharedSecret {
-        /// An encoded shared secret.
-        secret: Vec<u8>,
+        /// The shared secret.
+        secret: String,
     },
-}
-
-/// Certificate enrollment options.
-#[serde_as]
-#[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
-pub struct CertificateEnrollmentOptions {
-    /// Context specific identifier for how to construct the leaf certificate.
-    pub template: String,
-    /// See [EnrollmentCredentials].
-    pub credentials: EnrollmentCredentials,
-    /// A list of `IdentityFragment`s to request that together identifies the
-    /// end entity.
-    pub identity: Vec<IdentityFragment>,
 }
 
 /// Certificate enrollment connection settings.
@@ -62,8 +90,6 @@ pub struct CertificateEnrollmentOptions {
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentConnection {
-    /// Communication requires no configuration.
-    External,
     /// A connection URL.
     BaseUrl {
         /// The connection URL.
@@ -78,8 +104,6 @@ pub enum EnrollmentConnection {
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentTrust {
-    /// Communication is trusted by means outside the control of this app.
-    External,
     /// The provider will trust signatures that lead up to one of the trust
     /// anchor certificates.
     TrustAnchors {
@@ -98,7 +122,14 @@ pub enum EnrollmentTrust {
 
 /// Enrollment provider trait (interface).
 pub trait EnrollmentProvider: Sync + Send {
-    /// Enroll for a new certificate from the provided key pair and enrollment
+    /// Return a new instance.
+    ///
+    /// See [CertificateEnrollmentOptions] for all options.
+    fn with_options(options: &CertificateEnrollmentOptions) -> Arc<Self>
+    where
+        Self: Sized;
+
+    /// Enroll for a new certificate from the provided key pair and provider
     /// options.
     ///
     /// The returned chain is ordered with the leaf certificate matching the
@@ -111,7 +142,6 @@ pub trait EnrollmentProvider: Sync + Send {
         signing_algorithm_oid: &[u32],
         public_key: &dyn PublicKey,
         private_key: &dyn PrivateKey,
-        options: &CertificateEnrollmentOptions,
     ) -> Vec<Vec<u8>>;
 
     // TODO: Send a PoP to revocation service to prevent automatical "on hold" revocation of the cert

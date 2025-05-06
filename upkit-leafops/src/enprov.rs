@@ -29,41 +29,25 @@ pub struct CertificateEnrollmentProvider {
     provider: Arc<dyn EnrollmentProvider>,
 }
 
-impl CertificateEnrollmentProvider {
-    /// Return a new instance of the named [EnrollmentProvider] implementation.
-    pub fn by_name(
-        provider_name: &str,
-        enrollment_connection: &EnrollmentConnection,
-        enrollment_trust: &EnrollmentTrust,
-    ) -> Arc<dyn EnrollmentProvider> {
-        let provider: Arc<dyn EnrollmentProvider> = match provider_name {
-            "self_signed" => {
-                if !EnrollmentTrust::External.eq(enrollment_trust) {
-                    log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
-                }
-                Arc::new(SelfSignedProvider::default())
-            }
-            "cmp" => {
-                if !EnrollmentTrust::External.eq(enrollment_trust) {
-                    log::debug!("Only 'external' enrollment trust makes sense for '{provider_name}'. Ignoring parameter.");
-                }
-                Arc::new(CmpProvider::new(enrollment_connection).unwrap())
-            }
+impl CertificateEnrollmentProvider {}
+
+impl EnrollmentProvider for CertificateEnrollmentProvider {
+    fn with_options(options: &CertificateEnrollmentOptions) -> Arc<Self> {
+        let provider: Arc<dyn EnrollmentProvider> = match options.provider.as_str() {
+            "self_signed" => SelfSignedProvider::with_options(options),
+            "cmp" => CmpProvider::with_options(options),
             unknown_provider => panic!("Unknown provider '{unknown_provider}'."),
         };
         Arc::new(Self { provider })
     }
-}
 
-impl EnrollmentProvider for CertificateEnrollmentProvider {
     fn enroll_from_key_pair(
         &self,
         signing_algorithm_oid: &[u32],
         public_key: &dyn PublicKey,
         private_key: &dyn PrivateKey,
-        options: &CertificateEnrollmentOptions,
     ) -> Vec<Vec<u8>> {
         self.provider
-            .enroll_from_key_pair(signing_algorithm_oid, public_key, private_key, options)
+            .enroll_from_key_pair(signing_algorithm_oid, public_key, private_key)
     }
 }

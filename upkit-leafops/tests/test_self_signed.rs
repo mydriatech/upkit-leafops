@@ -23,12 +23,29 @@ use upkit_common::x509::cert::types::WellKnownAttribute;
 use upkit_common::x509::cert::types::WellKnownGeneralName;
 use upkit_leafops::enprov::CertificateEnrollmentOptions;
 use upkit_leafops::enprov::CertificateEnrollmentProvider;
-use upkit_leafops::enprov::EnrollmentConnection;
-use upkit_leafops::enprov::EnrollmentTrust;
+use upkit_leafops::enprov::EnrollmentProvider;
 
 #[test]
 fn test_self_signed_provider() {
     initialize_env_logger();
+    let options = CertificateEnrollmentOptions {
+        provider: "self_signed".to_string(),
+        template: "server".to_string(),
+        credentials: None,
+        identity: vec![
+            IdentityFragment {
+                name: WellKnownAttribute::CommonName.as_name(),
+                value: "www.example.org".to_string(),
+            },
+            IdentityFragment {
+                name: WellKnownGeneralName::DnsName.as_name(),
+                value: "www.example.org".to_string(),
+            },
+        ],
+        service: None,
+        trust: None,
+    };
+    log::debug!("options: {options}");
     // ML-DSA-44: 2.16.840.1.101.3.4.17
     let signing_algorithm_oid = &[2, 16, 840, 1, 101, 3, 4, 3, 17];
     let mut se = Tyst::instance()
@@ -36,29 +53,11 @@ fn test_self_signed_provider() {
         .by_oid(&tyst::encdec::oid::as_string(signing_algorithm_oid))
         .unwrap();
     let (public_key, private_key) = se.generate_key_pair();
-    let enrollment_provider = CertificateEnrollmentProvider::by_name(
-        "self_signed",
-        &EnrollmentConnection::External,
-        &EnrollmentTrust::External,
-    );
+    let enrollment_provider = CertificateEnrollmentProvider::with_options(&options);
     let encoded_certificate_chain = enrollment_provider.enroll_from_key_pair(
         signing_algorithm_oid,
         public_key.as_ref(),
         private_key.as_ref(),
-        &CertificateEnrollmentOptions {
-            template: "server".to_string(),
-            credentials: upkit_enprov::EnrollmentCredentials::External,
-            identity: vec![
-                IdentityFragment {
-                    name: WellKnownAttribute::CommonName.as_name(),
-                    value: "www.example.org".to_string(),
-                },
-                IdentityFragment {
-                    name: WellKnownGeneralName::DnsName.as_name(),
-                    value: "www.example.org".to_string(),
-                },
-            ],
-        },
     );
     let encoded_certificate = encoded_certificate_chain.first().unwrap();
     let certificate = CertificateParser::from_bytes(&encoded_certificate).unwrap();

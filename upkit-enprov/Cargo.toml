@@ -27,7 +27,7 @@ log = { workspace = true, features = [] }
 #cgroups-rs = "0.3"
 
 serde = { workspace = true, features = [] }
-#serde_json = { workspace = true, features = [] }
+serde_json = { workspace = true, features = [] }
 serde_with = { workspace = true, features = [] }
 
 # REST API

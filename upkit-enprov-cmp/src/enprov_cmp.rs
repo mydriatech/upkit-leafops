@@ -17,6 +17,7 @@
 
 //! [EnrollmentProvider] using the CMP protocol.
 
+use std::sync::Arc;
 use tyst::traits::se::PrivateKey;
 use tyst::traits::se::PublicKey;
 use upkit_common::x509::cert::types::WellKnownAttribute;
@@ -36,22 +37,10 @@ This implementation will use CMP's InitializationRequest protected by a shared
 secret with PBMAC1.
 */
 pub struct CmpProvider {
-    endpoint_base_url: String,
+    options: CertificateEnrollmentOptions,
 }
 
 impl CmpProvider {
-    /// Return a new instance.
-    pub fn new(enrollment_connection: &EnrollmentConnection) -> Option<Self> {
-        if let EnrollmentConnection::BaseUrl { base_url } = enrollment_connection {
-            Some(Self {
-                endpoint_base_url: base_url.to_owned(),
-            })
-        } else {
-            log::warn!("No URL provided. Unable to connect to CMP service.");
-            None
-        }
-    }
-
     fn cmp_over_http(
         endpoint_url: &str,
         pki_message: &PkiMessage,
@@ -76,19 +65,31 @@ impl CmpProvider {
 }
 
 impl EnrollmentProvider for CmpProvider {
+    fn with_options(options: &CertificateEnrollmentOptions) -> Arc<Self> {
+        Arc::new(Self {
+            options: options.to_owned(),
+        })
+    }
+
     fn enroll_from_key_pair(
         &self,
         signing_algorithm_oid: &[u32],
         public_key: &dyn PublicKey,
         private_key: &dyn PrivateKey,
-        options: &CertificateEnrollmentOptions,
     ) -> Vec<Vec<u8>> {
         log::debug!("Enrolling for a new certificate using CMP provider.");
         let (dn, sans) = upkit_common::x509::cert::build::util::split_by_identity_fragment_type(
-            &options.identity,
+            &self.options.identity,
         );
+        let endpoint_base_url;
+        if let Some(EnrollmentConnection::BaseUrl { base_url }) = &self.options.service {
+            endpoint_base_url = base_url.to_owned();
+        } else {
+            log::warn!("No base URL provided. Unable to connect to service.");
+            return vec![];
+        }
         let shared_secret;
-        if let EnrollmentCredentials::SharedSecret { secret } = &options.credentials {
+        if let Some(EnrollmentCredentials::SharedSecret { secret }) = &self.options.credentials {
             shared_secret = secret;
         } else {
             log::warn!("No shared secret provided. Unable to authenticate request.");
@@ -120,9 +121,9 @@ impl EnrollmentProvider for CmpProvider {
             .to_pki_body(),
             &cn,
             None,
-            shared_secret,
+            shared_secret.as_bytes(),
         );
-        let endpoint_url = format!("{}/{}", self.endpoint_base_url, options.template);
+        let endpoint_url = format!("{endpoint_base_url}/{}", self.options.template);
         match Self::cmp_over_http(&endpoint_url, &request) {
             Ok(response) => {
                 if let Err(e) = response.validate_response_nonce(&request) {
@@ -131,7 +132,9 @@ impl EnrollmentProvider for CmpProvider {
                 }
                 match response.get_pki_body() {
                     Ok(PkiBody::Ip(initialization_response)) => {
-                        if let Err(e) = response.validate_with_shared_secret(shared_secret) {
+                        if let Err(e) =
+                            response.validate_with_shared_secret(shared_secret.as_bytes())
+                        {
                             log::warn!("{e}");
                             return vec![];
                         }
