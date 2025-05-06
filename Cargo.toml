@@ -6,6 +6,7 @@ resolver = "2"
 members = [
     "upkit-leafops",
     "upkit-enprov",
+    "upkit-enprov-cmp",
     "upkit-enprov-selfsigned",
     "upkit-http-client",
 ]

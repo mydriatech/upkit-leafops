@@ -55,6 +55,22 @@ pub struct CertificateEnrollmentOptions {
     pub identity: Vec<IdentityFragment>,
 }
 
+/// Certificate enrollment connection settings.
+#[serde_as]
+#[skip_serializing_none]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+#[non_exhaustive]
+pub enum EnrollmentConnection {
+    /// Communication requires no configuration.
+    External,
+    /// A connection URL.
+    BaseUrl {
+        /// The connection URL.
+        base_url: String,
+    },
+}
+
 /// Certificate enrollment provider trust.
 #[serde_as]
 #[skip_serializing_none]

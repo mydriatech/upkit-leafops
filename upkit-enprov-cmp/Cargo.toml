@@ -1,0 +1,22 @@
+[package]
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+publish = { workspace = true }
+name = "upkit_enprov_cmp"
+description = "UPKIT Enrollment Provider using CMP."
+
+[dependencies]
+upkit_enprov = { path = "../upkit-enprov" }
+
+tyst = { workspace = true, features = [] }
+upkit_common = { workspace = true, features = []  }
+
+# Logging and tracing
+log = { workspace = true, features = [] }
+
+# HTTP client lib
+ureq = { workspace = true, features = [] }
+
+#[dev-dependencies]
