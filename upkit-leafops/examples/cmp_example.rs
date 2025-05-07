@@ -49,7 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         } else {
             "test".to_string()
         };
-        let secret = if let Some(shared_secret) = std::env::args().nth(3) {
+        let shared_secret = if let Some(shared_secret) = std::env::args().nth(3) {
             shared_secret
         } else {
             "foobar123".to_string()
@@ -66,7 +66,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let options = CertificateEnrollmentOptions {
             provider: "cmp".to_string(),
             template: profile,
-            credentials: Some(EnrollmentCredentials::SharedSecret { secret }),
+            credentials: Some(EnrollmentCredentials::SharedSecret { shared_secret }),
             identity: vec![
                 IdentityFragment::new_unchecked(
                     &WellKnownAttribute::CommonName.as_name(),
