@@ -50,9 +50,9 @@ impl std::fmt::Display for CertificateEnrollmentOptions {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let mut self_clone = self.clone();
         match self.credentials.as_ref() {
-            Some(EnrollmentCredentials::SharedSecret { secret: _ }) => {
+            Some(EnrollmentCredentials::SharedSecret { shared_secret: _ }) => {
                 self_clone.credentials = Some(EnrollmentCredentials::SharedSecret {
-                    secret: "**redacted**".to_string(),
+                    shared_secret: "**redacted**".to_string(),
                 })
             }
             None => (),
@@ -73,13 +73,14 @@ impl std::str::FromStr for CertificateEnrollmentOptions {
 #[serde_as]
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(untagged)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentCredentials {
     /// The provider will use a shared secret to bootstrap enrollment.
     SharedSecret {
         /// The shared secret.
-        secret: String,
+        shared_secret: String,
     },
 }
 
@@ -87,6 +88,7 @@ pub enum EnrollmentCredentials {
 #[serde_as]
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(untagged)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentConnection {
@@ -101,6 +103,7 @@ pub enum EnrollmentConnection {
 #[serde_as]
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(untagged)]
 #[serde(rename_all = "snake_case")]
 #[non_exhaustive]
 pub enum EnrollmentTrust {
