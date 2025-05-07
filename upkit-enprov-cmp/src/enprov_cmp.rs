@@ -89,7 +89,9 @@ impl EnrollmentProvider for CmpProvider {
             return vec![];
         }
         let secret;
-        if let Some(EnrollmentCredentials::SharedSecret { shared_secret }) = &self.options.credentials {
+        if let Some(EnrollmentCredentials::SharedSecret { shared_secret }) =
+            &self.options.credentials
+        {
             secret = shared_secret;
         } else {
             log::warn!("No shared secret provided. Unable to authenticate request.");
@@ -132,9 +134,7 @@ impl EnrollmentProvider for CmpProvider {
                 }
                 match response.get_pki_body() {
                     Ok(PkiBody::Ip(initialization_response)) => {
-                        if let Err(e) =
-                            response.validate_with_shared_secret(secret.as_bytes())
-                        {
+                        if let Err(e) = response.validate_with_shared_secret(secret.as_bytes()) {
                             log::warn!("{e}");
                             return vec![];
                         }
