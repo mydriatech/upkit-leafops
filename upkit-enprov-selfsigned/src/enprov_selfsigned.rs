@@ -18,9 +18,9 @@
 //! [EnrollmentProvider] that can create a self-signed certificate for testing.
 
 use std::sync::Arc;
+use tyst::Tyst;
 use tyst::traits::se::PrivateKey;
 use tyst::traits::se::PublicKey;
-use tyst::Tyst;
 use upkit_common::x509::cert::build::NoSignatureTbsCertificate;
 use upkit_common::x509::cert::extensions::BasicConstraints;
 use upkit_common::x509::cert::extensions::ExtendedKeyUsage;
@@ -59,7 +59,9 @@ impl EnrollmentProvider for SelfSignedProvider {
         extensions.add_issuer_alternative_name(&an);
         match self.options.template.as_str() {
             "timestamping" => {
-                log::debug!("Using demo template 'timestamping'. ExtendedKeyUsage::PkixTimeStamping will be added.");
+                log::debug!(
+                    "Using demo template 'timestamping'. ExtendedKeyUsage::PkixTimeStamping will be added."
+                );
                 extensions.add_extended_key_usage(&[ExtendedKeyUsage::PkixTimeStamping]);
             }
             "server" => {
@@ -69,7 +71,9 @@ impl EnrollmentProvider for SelfSignedProvider {
                 extensions.add_extended_key_usage(&[ExtendedKeyUsage::PkixServerAuth]);
             }
             other => {
-                log::debug!("Unknown certificate self-signed demo template '{other}'. No EKU will be added.");
+                log::debug!(
+                    "Unknown certificate self-signed demo template '{other}'. No EKU will be added."
+                );
             }
         }
         // Self-signed: This is not a CA cert.

@@ -18,8 +18,8 @@
 //! Certificate chain revocation status monitoring.
 
 use crossbeam_skiplist::SkipMap;
-use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
+use std::sync::atomic::AtomicBool;
 use upkit_common::x509::cert::parse::CertificateParser;
 use upkit_common::x509::crl::parse::CrlParser;
 use upkit_common::x509::crl::validate::CertificateCrlValidator;
@@ -262,10 +262,14 @@ impl MonitoredChain {
                                             .await;
                                             continue;
                                         } else {
-                                            log::warn!("OCSP response does not live long enough. Will not cache this.");
+                                            log::warn!(
+                                                "OCSP response does not live long enough. Will not cache this."
+                                            );
                                         }
                                     } else {
-                                        log::warn!("OCSP response is missing nextUpdate which means that newer updates are available all the time. Will not cache this.");
+                                        log::warn!(
+                                            "OCSP response is missing nextUpdate which means that newer updates are available all the time. Will not cache this."
+                                        );
                                     }
                                 } else {
                                     log::warn!(
@@ -417,7 +421,9 @@ impl MonitoredChain {
                         }
                         let time_of_next_check = std::cmp::max(next_update - x, now);
                         let time_to_next_check_seconds = time_of_next_check - now;
-                        log::debug!("Will sleep {time_to_next_check_seconds} seconds before attempting next CRL download.");
+                        log::debug!(
+                            "Will sleep {time_to_next_check_seconds} seconds before attempting next CRL download."
+                        );
                         tokio::time::sleep(tokio::time::Duration::from_secs(
                             time_to_next_check_seconds,
                         ))
