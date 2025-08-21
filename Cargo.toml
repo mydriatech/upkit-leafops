@@ -42,7 +42,7 @@ codegen-units = 1
 [workspace.dependencies]
 
 # Cryptographic provider
-tyst = { git = "https://github.com/mydriatech/tyst.git", branch = "main" }
+tyst = { git = "https://github.com/mydriatech/tyst.git", tag = "0.6.17" }
 upkit_common = { git = "https://github.com/mydriatech/upkit-common.git", branch = "main" }
 
 # Logging
@@ -50,9 +50,9 @@ log = { version = "0.4", default-features = false, features = ["release_max_leve
 env_logger = { version = "0.11.1", default-features = false, features = [] }
 
 # ASN.1 https://docs.rs/rasn/latest/rasn/
-rasn = { version = "0.26.6", default-features = false, features = []  }
-rasn-pkix = { version = "0.26.6", default-features = false, features = []  }
-rasn-cms = { version = "0.26.6", default-features = false, features = []  }
+rasn = { version = "0.27.1", default-features = false, features = []  }
+rasn-pkix = { version = "0.27.1", default-features = false, features = []  }
+rasn-cms = { version = "0.27.1", default-features = false, features = []  }
 
 # Serialization
 serde = { version = "1.0", default-features = true, features = ["derive"] }

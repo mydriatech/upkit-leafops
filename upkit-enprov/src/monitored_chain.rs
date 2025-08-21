@@ -286,21 +286,20 @@ impl MonitoredChain {
                     .encoded_ocsp_by_fp
                     .get(cert.fingerprint())
                     .map(|entry| OcspResponseParser::from_bytes(entry.value()))
-                {
-                    if let Some(single_response) = current.get_single_response_by_serial_number(
+                    && let Some(single_response) = current.get_single_response_by_serial_number(
                         &cert.get_encoded_issuer(),
                         &cert.get_serial_number(),
-                    ) {
-                        let next_update = single_response.get_next_update().unwrap();
-                        let now = upkit_common::util::time::now_epoch_micros();
-                        if now + 4 < next_update {
-                            // There is still some validity left, give it another chance
-                            tokio::time::sleep(tokio::time::Duration::from_secs(
-                                (next_update - now) / 2,
-                            ))
-                            .await;
-                            continue;
-                        }
+                    )
+                {
+                    let next_update = single_response.get_next_update().unwrap();
+                    let now = upkit_common::util::time::now_epoch_micros();
+                    if now + 4 < next_update {
+                        // There is still some validity left, give it another chance
+                        tokio::time::sleep(tokio::time::Duration::from_secs(
+                            (next_update - now) / 2,
+                        ))
+                        .await;
+                        continue;
                     }
                 }
                 // Remove any existing
