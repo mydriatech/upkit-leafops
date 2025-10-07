@@ -42,7 +42,7 @@ codegen-units = 1
 [workspace.dependencies]
 
 # Cryptographic provider
-tyst = { git = "https://github.com/mydriatech/tyst.git", tag = "0.6.17" }
+tyst = { git = "https://github.com/mydriatech/tyst.git", tag = "0.6.18" }
 upkit_common = { git = "https://github.com/mydriatech/upkit-common.git", branch = "main" }
 
 # Logging
